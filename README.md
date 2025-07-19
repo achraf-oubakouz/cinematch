@@ -32,4 +32,17 @@ CineMatch is a movie recommendation and discovery platform built with Django. It
 ---
 
 ## 📁 Project Structure
+cinematch/
+├── movies/ # Main app
+│ ├── management/ # Custom management command to import movies
+│ ├── templates/
+│ ├── static/
+│ ├── models.py
+│ ├── views.py
+│ ├── urls.py
+│ └── ...
+├── cinematch/ # Project settings
+│ └── settings.py
+├── db.sqlite3
+└── manage.py
 
