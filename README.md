@@ -26,7 +26,7 @@ CineMatch is a movie recommendation and discovery platform built with Django. It
 
 - **Backend**: Django, Python
 - **Frontend**: HTML, Bootstrap, Django Templating
-- **Database**: SQLite (or MySQL/PostgreSQL for production)
+- **Database**: MySQL
 - **External API**: [TMDB API](https://www.themoviedb.org/documentation/api)
 
 ---
