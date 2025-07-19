@@ -92,3 +92,32 @@ def recommendations(request):
     return render(request, 'movies/recommendations.html', {
         'recommendations': recommended_movies
     })
+
+@login_required
+def profile(request):
+    # Get user's ratings
+    user_ratings = Rating.objects.filter(user=request.user).select_related('movie').order_by('-created_at')
+    
+    # Calculate user stats
+    total_ratings = user_ratings.count()
+    avg_rating = user_ratings.aggregate(Avg('rating'))['rating__avg']
+    
+    # Get user's favorite genres based on highly rated movies
+    high_rated_movies = user_ratings.filter(rating__gte=4)
+    favorite_genres = {}
+    for rating in high_rated_movies:
+        genre = rating.movie.genre
+        if genre in favorite_genres:
+            favorite_genres[genre] += 1
+        else:
+            favorite_genres[genre] = 1
+    
+    # Sort genres by frequency
+    favorite_genres = sorted(favorite_genres.items(), key=lambda x: x[1], reverse=True)[:3]
+    
+    return render(request, 'movies/profile.html', {
+        'user_ratings': user_ratings[:10],  # Show last 10 ratings
+        'total_ratings': total_ratings,
+        'avg_rating': avg_rating,
+        'favorite_genres': favorite_genres,
+    })
