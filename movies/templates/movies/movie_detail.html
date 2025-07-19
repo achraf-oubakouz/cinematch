@@ -5,13 +5,16 @@
 {% block content %}
 <div class="row">
     <div class="col-md-4">
-        {% if movie.poster %}
-        <img src="{{ movie.poster.url }}" class="img-fluid rounded" alt="{{ movie.title }}">
+        {% if movie.poster_url %}
+            <img src="{{ movie.poster_url }}" alt="Poster of {{ movie.title }}" class="img-fluid" style="max-width: 300px; height: auto;">
+        {% elif movie.poster %}
+            <img src="{{ movie.poster.url }}" alt="Poster of {{ movie.title }}" class="img-fluid" style="max-width: 300px; height: auto;">
         {% else %}
-        <div class="bg-secondary d-flex align-items-center justify-content-center rounded" style="height: 400px;">
-            <span class="text-white">No Image</span>
-        </div>
+            <div class="bg-secondary d-flex align-items-center justify-content-center text-white" style="width: 300px; height: 450px;">
+                No Image Available
+            </div>
         {% endif %}
+
     </div>
     <div class="col-md-8">
         <h1>{{ movie.title }}</h1>

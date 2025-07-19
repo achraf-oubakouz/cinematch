@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Movie(models.Model):
+    tmdb_id = models.IntegerField(unique=True, null=True, blank=True) 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     director = models.CharField(max_length=255, default='Unknown')
@@ -9,6 +10,7 @@ class Movie(models.Model):
     genre = models.CharField(max_length=100, default='Unknown')
     duration = models.IntegerField(default=0, help_text='Duration in minutes')
     poster = models.ImageField(upload_to='movie_posters/', blank=True, null=True)
+    poster_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     

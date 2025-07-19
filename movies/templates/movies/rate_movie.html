@@ -12,12 +12,14 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4">
-                        {% if movie.poster %}
-                        <img src="{{ movie.poster.url }}" class="img-fluid rounded" alt="{{ movie.title }}">
+                        {% if movie.poster_url %}
+                            <img src="{{ movie.poster_url }}" class="img-fluid rounded" alt="{{ movie.title }}">
+                        {% elif movie.poster %}
+                            <img src="{{ movie.poster.url }}" class="img-fluid rounded" alt="{{ movie.title }}">
                         {% else %}
-                        <div class="bg-secondary d-flex align-items-center justify-content-center rounded" style="height: 200px;">
-                            <span class="text-white">No Image</span>
-                        </div>
+                            <div class="bg-secondary d-flex align-items-center justify-content-center rounded text-white" style="height: 200px;">
+                                <span>No Image</span>
+                            </div>
                         {% endif %}
                     </div>
                     <div class="col-md-8">

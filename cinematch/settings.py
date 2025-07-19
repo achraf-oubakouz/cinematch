@@ -141,3 +141,5 @@ LOGOUT_REDIRECT_URL = 'movies:index'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TMDB_API_KEY = '718d6ac9c6465ad95bac344be466fce9'

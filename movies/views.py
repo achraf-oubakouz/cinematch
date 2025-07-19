@@ -10,6 +10,10 @@ from .recommender import MovieRecommender
 def index(request):
     movies_list = Movie.objects.all().order_by('-id')
     
+    # Add average rating to each movie
+    for movie in movies_list:
+        movie.average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+    
     paginator = Paginator(movies_list, 12)  # Show 12 movies per page
     page_number = request.GET.get('page')
     movies = paginator.get_page(page_number)

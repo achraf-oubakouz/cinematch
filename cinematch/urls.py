@@ -23,21 +23,30 @@ from movies.forms import CustomUserCreationForm
 from django.views.generic import CreateView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import messages
+from django.urls import reverse_lazy
 
 def logout_view(request):
     logout(request)
     return redirect('movies:index')
+
+class CustomSignUpView(CreateView):
+    template_name = 'registration/signup.html'
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('login')
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        username = form.cleaned_data.get('username')
+        messages.success(self.request, f'Account created successfully for {username}! Please login to continue.')
+        return response
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('movies.urls', namespace='movies')),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', logout_view, name='logout'),
-    path('signup/', CreateView.as_view(
-        template_name='registration/signup.html',
-        form_class=CustomUserCreationForm,
-        success_url='/'
-    ), name='signup'),
+    path('signup/', CustomSignUpView.as_view(), name='signup'),
 ]
 
 # Serve media files in development
