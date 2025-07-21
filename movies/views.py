@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, Q
@@ -114,29 +116,196 @@ def search_movies(request):
 
 @login_required
 def profile(request):
-    # Get user's ratings
+    # Prepare data for user profile
     user_ratings = Rating.objects.filter(user=request.user).select_related('movie').order_by('-created_at')
-    
-    # Calculate user stats
     total_ratings = user_ratings.count()
     avg_rating = user_ratings.aggregate(Avg('rating'))['rating__avg']
     
-    # Get user's favorite genres based on highly rated movies
     high_rated_movies = user_ratings.filter(rating__gte=4)
     favorite_genres = {}
     for rating in high_rated_movies:
         genre = rating.movie.genre
-        if genre in favorite_genres:
-            favorite_genres[genre] += 1
-        else:
-            favorite_genres[genre] = 1
-    
-    # Sort genres by frequency
+        favorite_genres[genre] = favorite_genres.get(genre, 0) + 1
     favorite_genres = sorted(favorite_genres.items(), key=lambda x: x[1], reverse=True)[:3]
     
-    return render(request, 'movies/profile.html', {
-        'user_ratings': user_ratings[:10],  # Show last 10 ratings
+    # Prepare admin data
+    total_users, total_movies, total_ratings_all = None, None, None
+    recently_joined, recent_movies = None, None
+    if request.user.is_staff:
+        total_users = User.objects.count()
+        total_movies = Movie.objects.count()
+        total_ratings_all = Rating.objects.count()
+        recently_joined = User.objects.order_by('-date_joined')[:5]
+        recent_movies = Movie.objects.order_by('-created_at')[:5]
+        
+    context = {
+        'user_ratings': user_ratings[:10],
         'total_ratings': total_ratings,
         'avg_rating': avg_rating,
         'favorite_genres': favorite_genres,
+        'total_users': total_users,
+        'total_movies': total_movies,
+        'total_ratings_all': total_ratings_all,
+        'recent_users': recently_joined,
+        'recent_movies': recent_movies,
+    }
+
+    return render(request, 'movies/profile.html', context)
+
+@staff_member_required
+def admin_users(request):
+    users = User.objects.all().order_by('-date_joined')
+    
+    # Add rating count to each user
+    for user in users:
+        user.rating_count = Rating.objects.filter(user=user).count()
+        user.avg_rating = Rating.objects.filter(user=user).aggregate(Avg('rating'))['rating__avg']
+    
+    paginator = Paginator(users, 20)  # Show 20 users per page
+    page_number = request.GET.get('page')
+    users_page = paginator.get_page(page_number)
+    
+    return render(request, 'movies/admin_users.html', {
+        'users': users_page,
+        'total_users': User.objects.count(),
     })
+
+@staff_member_required
+def admin_movies(request):
+    movies = Movie.objects.all().order_by('-created_at')
+    
+    # Add rating stats to each movie
+    for movie in movies:
+        movie.rating_count = Rating.objects.filter(movie=movie).count()
+        movie.avg_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+    
+    paginator = Paginator(movies, 20)  # Show 20 movies per page
+    page_number = request.GET.get('page')
+    movies_page = paginator.get_page(page_number)
+    
+    return render(request, 'movies/admin_movies.html', {
+        'movies': movies_page,
+        'total_movies': Movie.objects.count(),
+    })
+
+@staff_member_required
+def add_movie(request):
+    if request.method == 'POST':
+        # Handle form submission for adding a new movie
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        director = request.POST.get('director')
+        release_year = request.POST.get('release_year')
+        genre = request.POST.get('genre')
+        duration = request.POST.get('duration')
+        poster_url = request.POST.get('poster_url')
+        
+        if title and release_year:
+            Movie.objects.create(
+                title=title,
+                description=description or '',
+                director=director or 'Unknown',
+                release_year=int(release_year),
+                genre=genre or 'Unknown',
+                duration=int(duration) if duration else 0,
+                poster_url=poster_url or ''
+            )
+            messages.success(request, f'Movie "{title}" has been added successfully!')
+            return redirect('movies:admin_movies')
+        else:
+            messages.error(request, 'Title and release year are required.')
+    
+    return render(request, 'movies/add_movie.html')
+
+@staff_member_required
+def edit_movie(request, movie_id):
+    movie = get_object_or_404(Movie, id=movie_id)
+    
+    if request.method == 'POST':
+        # Handle form submission for editing a movie
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        director = request.POST.get('director')
+        release_year = request.POST.get('release_year')
+        genre = request.POST.get('genre')
+        duration = request.POST.get('duration')
+        poster_url = request.POST.get('poster_url')
+        
+        if title and release_year:
+            movie.title = title
+            movie.description = description or ''
+            movie.director = director or 'Unknown'
+            movie.release_year = int(release_year)
+            movie.genre = genre or 'Unknown'
+            movie.duration = int(duration) if duration else 0
+            movie.poster_url = poster_url or ''
+            movie.save()
+            
+            messages.success(request, f'Movie "{title}" has been updated successfully!')
+            return redirect('movies:admin_movies')
+        else:
+            messages.error(request, 'Title and release year are required.')
+    
+    return render(request, 'movies/edit_movie.html', {'movie': movie})
+
+@staff_member_required
+def delete_movie(request, movie_id):
+    movie = get_object_or_404(Movie, id=movie_id)
+    
+    if request.method == 'POST':
+        movie_title = movie.title
+        movie.delete()
+        messages.success(request, f'Movie "{movie_title}" has been deleted successfully!')
+        return redirect('movies:admin_movies')
+    
+    return render(request, 'movies/delete_movie.html', {'movie': movie})
+
+@staff_member_required
+def edit_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        # Handle form submission for editing a user
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        is_staff = request.POST.get('is_staff') == 'on'
+        is_active = request.POST.get('is_active') == 'on'
+        
+        if username:
+            # Check if username is taken by another user
+            if User.objects.filter(username=username).exclude(id=user.id).exists():
+                messages.error(request, 'Username is already taken.')
+            else:
+                user.username = username
+                user.email = email or ''
+                user.first_name = first_name or ''
+                user.last_name = last_name or ''
+                user.is_staff = is_staff
+                user.is_active = is_active
+                user.save()
+                
+                messages.success(request, f'User "{username}" has been updated successfully!')
+                return redirect('movies:admin_users')
+        else:
+            messages.error(request, 'Username is required.')
+    
+    return render(request, 'movies/edit_user.html', {'user_obj': user})
+
+@staff_member_required
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    
+    # Prevent deleting yourself
+    if user.id == request.user.id:
+        messages.error(request, 'You cannot delete your own account.')
+        return redirect('movies:admin_users')
+    
+    if request.method == 'POST':
+        username = user.username
+        user.delete()
+        messages.success(request, f'User "{username}" has been deleted successfully!')
+        return redirect('movies:admin_users')
+    
+    return render(request, 'movies/delete_user.html', {'user_obj': user})

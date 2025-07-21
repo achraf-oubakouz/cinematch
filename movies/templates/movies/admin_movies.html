@@ -1,0 +1,267 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Admin - Movies{% endblock %}
+
+{% block content %}
+<style>
+    /* Fix table text visibility for dark theme */
+    .table {
+        color: #ffffff !important;
+        background: rgba(20, 20, 20, 0.95) !important;
+    }
+    
+    .table th {
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        background: rgba(30, 30, 30, 0.9) !important;
+    }
+    
+    .table td {
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .table-hover tbody tr:hover {
+        background: rgba(40, 40, 40, 0.7) !important;
+        color: #ffffff !important;
+    }
+    
+    .title-link {
+        color: #667eea !important;
+        text-decoration: none;
+    }
+    
+    .title-link:hover {
+        color: #764ba2 !important;
+        text-decoration: underline;
+    }
+    
+    .pagination span {
+        color: #ffffff !important;
+    }
+    
+    .text-muted {
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    .lead {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    /* Enhanced Dropdown styling for dark theme */
+    .dropdown {
+        position: relative;
+    }
+    
+    .custom-dropdown-btn {
+        background: rgba(40, 40, 40, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 10px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .custom-dropdown-btn:hover {
+        background: rgba(60, 60, 60, 0.9);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+    }
+    
+    .custom-dropdown-btn:focus {
+        background: rgba(60, 60, 60, 0.9);
+        border-color: rgba(255, 255, 255, 0.4);
+        box-shadow: none;
+        color: #ffffff;
+        outline: none;
+    }
+    
+    .dropdown-menu-dark {
+        background: linear-gradient(145deg, rgba(25, 25, 25, 0.98) 0%, rgba(15, 15, 15, 0.99) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(20px) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+        padding: 8px 0 !important;
+        margin: 0 !important;
+        min-width: 120px !important;
+        top: 100% !important;
+        right: 0 !important;
+        left: auto !important;
+        transform: none !important;
+        position: absolute !important;
+        animation: none !important;
+        transition: opacity 0.15s ease-out !important;
+    }
+    
+    .dropdown-menu-dark.show {
+        opacity: 1 !important;
+    }
+    
+    .dropdown-menu-dark:not(.show) {
+        opacity: 0 !important;
+    }
+    
+    .dropdown {
+        position: relative !important;
+    }
+    
+    @keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .dropdown-menu-dark .dropdown-item {
+        color: rgba(255, 255, 255, 0.9) !important;
+        padding: 10px 16px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        border-radius: 8px !important;
+        margin: 2px 8px !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .dropdown-menu-dark .dropdown-item i {
+        width: 16px !important;
+        height: 16px !important;
+        margin-right: 8px !important;
+        opacity: 0.8 !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .dropdown-menu-dark .dropdown-item:hover {
+        background: linear-gradient(135deg, rgba(103, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+        color: #ffffff !important;
+        transform: translateX(2px) !important;
+    }
+    
+    .dropdown-menu-dark .dropdown-item:hover i {
+        opacity: 1 !important;
+        color: #667eea !important;
+    }
+    
+    .dropdown-menu-dark .dropdown-item.text-danger {
+        color: rgba(255, 107, 122, 0.9) !important;
+    }
+    
+    .dropdown-menu-dark .dropdown-item.text-danger:hover {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(200, 35, 51, 0.1) 100%) !important;
+        color: #ff6b7a !important;
+    }
+    
+    .dropdown-menu-dark .dropdown-item.text-danger:hover i {
+        color: #ff6b7a !important;
+    }
+    
+    .dropdown-menu-dark .dropdown-divider {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        margin: 8px 12px !important;
+        opacity: 0.6 !important;
+    }
+</style>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Manage Movies</h1>
+            <p class="lead">List of all movies in the system.</p>
+        </div>
+        <a href="{% url 'movies:add_movie' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle me-2"></i>Add New Movie
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Director</th>
+                    <th>Year</th>
+                    <th>Genre</th>
+                    <th>Ratings</th>
+                    <th>Avg Rating</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movie in movies %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'movies:movie_detail' movie.id %}" class="title-link">
+                            {{ movie.title|truncatechars:30 }}
+                        </a>
+                    </td>
+                    <td>{{ movie.director|default:"Unknown" }}</td>
+                    <td>{{ movie.release_year }}</td>
+                    <td>{{ movie.genre|default:"Unknown" }}</td>
+                    <td>{{ movie.rating_count }}</td>
+                    <td>
+                        {% if movie.avg_rating %}
+                            <span class="badge bg-warning">★ {{ movie.avg_rating|floatformat:1 }}</span>
+                        {% else %}
+                            <span class="text-muted">No ratings</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="custom-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                ▼
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'movies:movie_detail' movie.id %}">
+                                        <i class="bi bi-eye me-2"></i>View Movie
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'movies:edit_movie' movie.id %}">
+                                        <i class="bi bi-pencil me-2"></i>Edit Movie
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'movies:delete_movie' movie.id %}">
+                                        <i class="bi bi-trash me-2"></i>Delete Movie
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No movies found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if movies.has_previous %}
+            <a href="?page={{ movies.previous_page_number }}" class="btn btn-outline-primary me-2">Previous</a>
+            {% endif %}
+
+            <span>Page {{ movies.number }} of {{ movies.paginator.num_pages }}</span>
+
+            {% if movies.has_next %}
+            <a href="?page={{ movies.next_page_number }}" class="btn btn-outline-primary ms-2">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
