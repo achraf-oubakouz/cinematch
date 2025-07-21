@@ -22,6 +22,22 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+/* Logo image styling */
+.logo-image {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.navbar-brand:hover .logo-image {
+    filter: brightness(1.1);
+    transform: scale(1.05);
 }
 
 .nav-link {
@@ -339,20 +355,51 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-control {
-    background: rgba(40, 40, 40, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: rgba(40, 40, 40, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-appearance: none;
 }
 
 .form-control:focus {
-    background: rgba(50, 50, 50, 0.9) !important;
+    background: rgba(50, 50, 50, 0.95) !important;
     border-color: #667eea !important;
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+.form-control:active,
+.form-control:focus:active {
+    background: rgba(50, 50, 50, 0.95) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .form-control::placeholder {
     color: rgba(255, 255, 255, 0.5) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Specific input type fixes */
+input[type="text"].form-control,
+input[type="email"].form-control,
+input[type="password"].form-control {
+    background: rgba(40, 40, 40, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-appearance: none;
+}
+
+input[type="text"].form-control:focus,
+input[type="email"].form-control:focus,
+input[type="password"].form-control:focus {
+    background: rgba(50, 50, 50, 0.95) !important;
+    border-color: #667eea !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .form-text {
@@ -492,8 +539,65 @@ textarea.form-control {
 }
 
 /* Ensure all text inputs have white text */
-input[type="text"], input[type="email"], input[type="password"] {
+input[type="text"], input[type="email"], input[type="password"], input[type="username"] {
     color: #ffffff !important;
+    background: rgba(40, 40, 40, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Django form field overrides */
+input[name="username"], input[name="email"], input[name="password"], input[name="password1"], input[name="password2"] {
+    color: #ffffff !important;
+    background: rgba(40, 40, 40, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+input[name="username"]:focus, input[name="email"]:focus, input[name="password"]:focus, input[name="password1"]:focus, input[name="password2"]:focus {
+    color: #ffffff !important;
+    background: rgba(50, 50, 50, 0.95) !important;
+    border-color: #667eea !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Browser autofill/autocomplete fixes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgba(40, 40, 40, 0.9) inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    color: #ffffff !important;
+    background-color: rgba(40, 40, 40, 0.9) !important;
+    background: rgba(40, 40, 40, 0.9) !important;
+    caret-color: #ffffff !important;
+}
+
+input[type="text"]:-webkit-autofill,
+input[type="email"]:-webkit-autofill,
+input[type="password"]:-webkit-autofill,
+input[name="username"]:-webkit-autofill,
+input[name="email"]:-webkit-autofill,
+input[name="password"]:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px rgba(40, 40, 40, 0.9) inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    color: #ffffff !important;
+    background-color: rgba(40, 40, 40, 0.9) !important;
+    background: rgba(40, 40, 40, 0.9) !important;
+    caret-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Firefox autofill */
+input:-moz-autofill {
+    background: rgba(40, 40, 40, 0.9) !important;
+    color: #ffffff !important;
+}
+
+/* Microsoft Edge autofill */
+input::-ms-input-placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Ensure labels and strong text are visible */

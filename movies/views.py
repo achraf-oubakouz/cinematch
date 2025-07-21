@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 from .models import Movie, Rating
 from .forms import MovieRatingForm
 from .recommender import MovieRecommender
@@ -91,6 +91,25 @@ def recommendations(request):
     
     return render(request, 'movies/recommendations.html', {
         'recommendations': recommended_movies
+    })
+
+def search_movies(request):
+    query = request.GET.get('q')
+    movies_list = []
+    if query:
+        movies_list = Movie.objects.filter(
+            Q(title__icontains=query) | 
+            Q(genre__icontains=query) |
+            Q(director__icontains=query)
+        ).order_by('title')
+        
+        # Add average rating to each movie
+        for movie in movies_list:
+            movie.average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+    
+    return render(request, 'movies/search_results.html', {
+        'movies': movies_list,
+        'query': query
     })
 
 @login_required

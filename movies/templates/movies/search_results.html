@@ -1,0 +1,102 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Search Results - CineMatch{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Search Results</h1>
+        {% if query %}
+            <p class="lead">Search results for: "<strong>{{ query }}</strong>"</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if movies %}
+    <div class="row">
+        <div class="col-12">
+            <p class="text-muted mb-4">Found {{ movies.count }} movie{% if movies.count != 1 %}s{% endif %}</p>
+        </div>
+    </div>
+    
+    <div class="movie-grid">
+        {% for movie in movies %}
+            <div class="movie-card">
+                <div class="movie-poster">
+                    <a href="{% url 'movies:movie_detail' movie.id %}" class="poster-link">
+                        {% if movie.poster_url %}
+                            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                        {% elif movie.poster %}
+                            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+                        {% else %}
+                            <div class="bg-secondary d-flex align-items-center justify-content-center h-100">
+                                <span class="text-white">No Image</span>
+                            </div>
+                        {% endif %}
+                    </a>
+                    <div class="movie-overlay">
+                        <span style="color: white; font-size: 18px;">+</span>
+                    </div>
+                </div>
+                
+                <div class="movie-info">
+                    <h3 class="movie-title">
+                        <a href="{% url 'movies:movie_detail' movie.id %}" class="title-link">{{ movie.title }}</a>
+                    </h3>
+                    
+                    <div class="movie-meta">
+                        {% if movie.average_rating %}
+                            <div class="movie-rating">
+                                <span>★</span>
+                                <span>{{ movie.average_rating|floatformat:1 }}</span>
+                            </div>
+                        {% else %}
+                            <div class="movie-rating">
+                                <span>★</span>
+                                <span>--</span>
+                            </div>
+                        {% endif %}
+                        <span>{{ movie.release_year }}</span>
+                        <span>{{ movie.genre }}</span>
+                    </div>
+                    
+                    <div class="movie-actions">
+                        <a href="{% url 'movies:movie_detail' movie.id %}" class="btn-modern btn-primary-modern">View Details</a>
+                        <a href="{% url 'movies:rate_movie' movie.id %}" class="btn-modern">Rate</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h4>
+                    {% if query %}
+                        No movies found
+                    {% else %}
+                        Enter a search term
+                    {% endif %}
+                </h4>
+                <p>
+                    {% if query %}
+                        No movies were found matching "{{ query }}". Try searching with different keywords or check your spelling.
+                    {% else %}
+                        Please enter a movie title or genre to search for movies.
+                    {% endif %}
+                </p>
+                <a href="{% url 'movies:index' %}" class="btn btn-primary">Browse All Movies</a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="row mt-4 mb-5">
+    <div class="col-12">
+        <div class="text-center">
+            <a href="{% url 'movies:index' %}" class="btn btn-outline-light">← Back to All Movies</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
