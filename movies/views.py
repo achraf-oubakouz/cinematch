@@ -10,17 +10,101 @@ from .forms import MovieRatingForm
 from .recommender import MovieRecommender
 
 def index(request):
-    movies_list = Movie.objects.all().order_by('-id')
+    movies_list = Movie.objects.all()
     
-    # Add average rating to each movie
+    # Get filter parameters
+    genre_filter = request.GET.get('genre', '')
+    year_filter = request.GET.get('year', '')
+    director_filter = request.GET.get('director', '')
+    rating_filter = request.GET.get('rating', '')
+    sort_by = request.GET.get('sort', 'title')
+    
+    # Apply filters
+    if genre_filter:
+        movies_list = movies_list.filter(genre__icontains=genre_filter)
+    
+    if year_filter:
+        try:
+            year = int(year_filter)
+            movies_list = movies_list.filter(release_year=year)
+        except ValueError:
+            pass
+    
+    if director_filter:
+        movies_list = movies_list.filter(director__icontains=director_filter)
+    
+    # Apply sorting
+    if sort_by == 'title':
+        movies_list = movies_list.order_by('title')
+    elif sort_by == 'year_desc':
+        movies_list = movies_list.order_by('-release_year')
+    elif sort_by == 'year_asc':
+        movies_list = movies_list.order_by('release_year')
+    else:
+        # Default to title sorting for consistent results
+        movies_list = movies_list.order_by('title')
+    
+    # Add average rating to each movie and apply rating filter
+    movies_with_ratings = []
     for movie in movies_list:
-        movie.average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+        avg_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+        movie.average_rating = avg_rating
+        
+        # Apply rating filter
+        if rating_filter:
+            try:
+                min_rating = float(rating_filter)
+                if avg_rating and avg_rating >= min_rating:
+                    movies_with_ratings.append(movie)
+                elif not avg_rating and min_rating == 0:  # Include unrated movies for "0+" filter
+                    movies_with_ratings.append(movie)
+            except ValueError:
+                movies_with_ratings.append(movie)
+        else:
+            movies_with_ratings.append(movie)
     
-    paginator = Paginator(movies_list, 12)  # Show 12 movies per page
+    # Sort by rating if requested (after adding ratings)
+    if sort_by == 'rating_desc':
+        movies_with_ratings.sort(key=lambda x: x.average_rating or 0, reverse=True)
+    elif sort_by == 'rating_asc':
+        movies_with_ratings.sort(key=lambda x: x.average_rating or 0)
+    
+    # Get unique values for filter options
+    # Extract individual genres from combined genre strings
+    all_genre_strings = Movie.objects.values_list('genre', flat=True).distinct().exclude(genre__isnull=True).exclude(genre__exact='').exclude(genre__exact='Unknown')
+    all_genres = set()
+    for genre_string in all_genre_strings:
+        if genre_string:
+            # Split by comma and clean up each genre
+            genres = [g.strip() for g in genre_string.split(',') if g.strip()]
+            all_genres.update(genres)
+    
+    # Generate full year range from 1900 to current year + 1
+    from datetime import datetime
+    current_year = datetime.now().year
+    all_years = list(range(current_year + 1, 1899, -1))  # From next year down to 1900
+    
+    all_directors = Movie.objects.values_list('director', flat=True).distinct().exclude(director__isnull=True).exclude(director__exact='').exclude(director__exact='Unknown')
+    
+    paginator = Paginator(movies_with_ratings, 12)  # Show 12 movies per page
     page_number = request.GET.get('page')
     movies = paginator.get_page(page_number)
     
-    return render(request, 'movies/index.html', {'movies': movies})
+    context = {
+        'movies': movies,
+        'all_genres': sorted(all_genres),
+        'all_years': all_years,
+        'all_directors': sorted(set([d for d in all_directors if d and d != 'Unknown']))[:20],  # Limit to top 20 directors
+        'current_filters': {
+            'genre': genre_filter,
+            'year': year_filter,
+            'director': director_filter,
+            'rating': rating_filter,
+            'sort': sort_by,
+        }
+    }
+    
+    return render(request, 'movies/index.html', context)
 
 def movie_detail(request, movie_id):
     movie = get_object_or_404(Movie, id=movie_id)
