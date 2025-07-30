@@ -1,12 +1,13 @@
 {% extends 'movies/base.html' %}
+{% load i18n %}
 
 {% block title %}Recommendations - CineMatch{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
-        <h1>Recommended Movies for You</h1>
-        <p class="lead">Based on your ratings and similar users' preferences</p>
+        <h1>{% trans "Recommended Movies for You" %}</h1>
+        <p class="lead">{% trans "Based on your ratings and similar users' preferences" %}</p>
     </div>
 </div>
 
@@ -22,7 +23,7 @@
                         <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
                     {% else %}
                         <div class="bg-secondary d-flex align-items-center justify-content-center h-100">
-                            <span class="text-white">No Image</span>
+                            <span class="text-white">{% trans "No Image" %}</span>
                         </div>
                     {% endif %}
                 </a>
@@ -53,8 +54,8 @@
                 </div>
                 
                 <div class="movie-actions">
-                    <a href="{% url 'movies:movie_detail' movie.id %}" class="btn-modern btn-primary-modern">View Details</a>
-                    <a href="{% url 'movies:rate_movie' movie.id %}" class="btn-modern">Rate</a>
+                    <a href="{% url 'movies:movie_detail' movie.id %}" class="btn-modern btn-primary-modern">{% trans "View Details" %}</a>
+                    <a href="{% url 'movies:rate_movie' movie.id %}" class="btn-modern">{% trans "Rate" %}</a>
                 </div>
             </div>
         </div>
@@ -64,9 +65,9 @@
 <div class="row">
     <div class="col-12">
         <div class="alert alert-info">
-            <h4>No recommendations available yet</h4>
-            <p>We need more data to provide personalized recommendations. Try rating some movies first!</p>
-            <a href="{% url 'movies:index' %}" class="btn btn-primary">Browse Movies</a>
+            <h4>{% trans "No recommendations available yet" %}</h4>
+            <p>{% trans "We need more data to provide personalized recommendations. Try rating some movies first!" %}</p>
+            <a href="{% url 'movies:index' %}" class="btn btn-primary">{% trans "Browse Movies" %}</a>
         </div>
     </div>
 </div>
@@ -76,17 +77,17 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5>How do recommendations work?</h5>
+                <h5>{% trans "How do recommendations work?" %}</h5>
             </div>
             <div class="card-body">
-                <p>Our recommendation system uses collaborative filtering to suggest movies you might like:</p>
+                <p>{% trans "Our recommendation system uses collaborative filtering to suggest movies you might like:" %}</p>
                 <ul>
-                    <li>We analyze your movie ratings and preferences</li>
-                    <li>We find other users with similar tastes</li>
-                    <li>We recommend movies that similar users enjoyed</li>
-                    <li>If you haven't rated enough movies yet, we show popular movies instead</li>
+                    <li>{% trans "We analyze your movie ratings and preferences" %}</li>
+                    <li>{% trans "We find other users with similar tastes" %}</li>
+                    <li>{% trans "We recommend movies that similar users enjoyed" %}</li>
+                    <li>{% trans "If you haven't rated enough movies yet, we show popular movies instead" %}</li>
                 </ul>
-                <p class="mb-0">The more movies you rate, the better our recommendations become!</p>
+                <p class="mb-0">{% trans "The more movies you rate, the better our recommendations become!" %}</p>
             </div>
         </div>
     </div>

@@ -1,13 +1,14 @@
 {% extends 'movies/base.html' %}
+{% load i18n %}
 
-{% block title %}Rate {{ movie.title }} - CineMatch{% endblock %}
+{% block title %}{% trans "Rate" %} {{ movie.title }} - CineMatch{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h3>Rate "{{ movie.title }}"</h3>
+                <h3>{% trans "Rate" %} "{{ movie.title }}"</h3>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -18,16 +19,15 @@
                             <img src="{{ movie.poster.url }}" class="img-fluid rounded" alt="{{ movie.title }}">
                         {% else %}
                             <div class="bg-secondary d-flex align-items-center justify-content-center rounded text-white" style="height: 200px;">
-                                <span>No Image</span>
+                                <span>{% trans "No Image" %}</span>
                             </div>
                         {% endif %}
                     </div>
                     <div class="col-md-8">
                         <h5>{{ movie.title }}</h5>
-                        <p><strong>Director:</strong> {{ movie.director }}</p>
-                        <p><strong>Year:</strong> {{ movie.release_year }}</p>
-                        <p><strong>Genre:</strong> {{ movie.genre }}</p>
-                        <p class="text-muted">{{ movie.description|truncatewords:30 }}</p>
+                        <p><strong>{% trans "Director" %}:</strong> {{ movie.director }}</p>
+                        <p><strong>{% trans "Year" %}:</strong> {{ movie.release_year }}</p>
+                        <p><strong>{% trans "Genre" %}:</strong> {{ movie.genre }}</p>
                     </div>
                 </div>
                 
@@ -35,19 +35,19 @@
                 
                 {% if existing_rating %}
                 <div class="alert alert-info">
-                    <h6>Your Previous Rating</h6>
-                    <p>Rating: <span class="badge bg-warning">★ {{ existing_rating.rating }}</span></p>
+                    <h6>{% trans "Your Previous Rating" %}</h6>
+                    <p>{% trans "Rating" %}: <span class="badge bg-warning">★ {{ existing_rating.rating }}</span></p>
                     {% if existing_rating.review %}
-                    <p>Review: "{{ existing_rating.review }}"</p>
+                    <p>{% trans "Review" %}: "{{ existing_rating.review }}"</p>
                     {% endif %}
-                    <p class="mb-0">You can update your rating below.</p>
+                    <p class="mb-0">{% trans "You can update your rating below." %}</p>
                 </div>
                 {% endif %}
                 
                 <form method="post" class="mt-4">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="{{ form.rating.id_for_label }}" class="form-label">Your Rating (1-5 stars)</label>
+                        <label for="{{ form.rating.id_for_label }}" class="form-label">{% trans "Your Rating (1-5 stars)" %}</label>
                         {{ form.rating }}
                         {% if form.rating.errors %}
                         <div class="invalid-feedback d-block">
@@ -59,7 +59,7 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="{{ form.review.id_for_label }}" class="form-label">Your Review (Optional)</label>
+                        <label for="{{ form.review.id_for_label }}" class="form-label">{% trans "Your Review (Optional)" %}</label>
                         {{ form.review }}
                         {% if form.review.errors %}
                         <div class="invalid-feedback d-block">
@@ -71,9 +71,9 @@
                     </div>
                     
                     <div class="d-flex justify-content-between">
-                        <a href="{% url 'movies:movie_detail' movie.id %}" class="btn btn-secondary">Cancel</a>
+                        <a href="{% url 'movies:movie_detail' movie.id %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
                         <button type="submit" class="btn btn-primary">
-                            {% if existing_rating %}Update Rating{% else %}Submit Rating{% endif %}
+                            {% if existing_rating %}{% trans "Update Rating" %}{% else %}{% trans "Submit Rating" %}{% endif %}
                         </button>
                     </div>
                 </form>

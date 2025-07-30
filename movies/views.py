@@ -8,6 +8,34 @@ from django.db.models import Avg, Count, Q
 from .models import Movie, Rating
 from .forms import MovieRatingForm
 from .recommender import MovieRecommender
+from . import tmdb_utils
+from django.utils import translation
+from types import SimpleNamespace
+
+def get_localized_movie(movie):
+    """Get localized movie data from TMDB if available"""
+    if not movie.tmdb_id:
+        return movie
+    
+    try:
+        tmdb_data = tmdb_utils.fetch_movie_details(movie.tmdb_id)
+        localized_movie = SimpleNamespace()
+        localized_movie.id = movie.id
+        localized_movie.tmdb_id = movie.tmdb_id
+        localized_movie.title = tmdb_data.get('title', movie.title)
+        localized_movie.description = tmdb_data.get('overview', movie.description)
+        localized_movie.director = movie.director
+        localized_movie.release_year = movie.release_year
+        localized_movie.genre = movie.genre
+        localized_movie.duration = tmdb_data.get('runtime', movie.duration)
+        localized_movie.poster = movie.poster
+        localized_movie.poster_url = movie.poster_url
+        if tmdb_data.get('poster_path'):
+            localized_movie.poster_url = f"https://image.tmdb.org/t/p/w500{tmdb_data['poster_path']}"
+        return localized_movie
+    except Exception as e:
+        print(f"Error fetching TMDB data for movie {movie.id}: {e}")
+        return movie
 
 def index(request):
     movies_list = Movie.objects.all()
@@ -90,6 +118,18 @@ def index(request):
     page_number = request.GET.get('page')
     movies = paginator.get_page(page_number)
     
+    # Apply localization only to movies on current page to avoid too many API calls
+    localized_movies = []
+    for movie in movies:
+        localized_movie = get_localized_movie(movie)
+        # Preserve the average_rating that was calculated earlier
+        if hasattr(movie, 'average_rating'):
+            localized_movie.average_rating = movie.average_rating
+        localized_movies.append(localized_movie)
+    
+    # Update the page object with localized movies
+    movies.object_list = localized_movies
+    
     context = {
         'movies': movies,
         'all_genres': sorted(all_genres),
@@ -109,16 +149,19 @@ def index(request):
 def movie_detail(request, movie_id):
     movie = get_object_or_404(Movie, id=movie_id)
     
+    # Get localized movie data
+    localized_movie = get_localized_movie(movie)
+    
     # Calculate average rating and total ratings
     ratings = Rating.objects.filter(movie=movie)
-    movie.average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
-    movie.total_ratings = ratings.count()
+    localized_movie.average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+    localized_movie.total_ratings = ratings.count()
     
     # Get recent reviews
     reviews = ratings.select_related('user').order_by('-created_at')[:10]
     
     return render(request, 'movies/movie_detail.html', {
-        'movie': movie,
+        'movie': localized_movie,
         'reviews': reviews
     })
 
@@ -160,8 +203,11 @@ def rate_movie(request, movie_id):
             initial_data['review'] = existing_rating.review
         form = MovieRatingForm(initial=initial_data)
     
+    # Get localized movie data
+    localized_movie = get_localized_movie(movie)
+    
     return render(request, 'movies/rate_movie.html', {
-        'movie': movie,
+        'movie': localized_movie,
         'form': form,
         'existing_rating': existing_rating
     })
@@ -171,12 +217,15 @@ def recommendations(request):
     recommender = MovieRecommender()
     recommended_movies = recommender.get_recommendations(request.user.id, num_recommendations=12)
     
-    # Add average rating to each movie
+    localized_recommendations = []
     for movie in recommended_movies:
-        movie.average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+        localized_movie = get_localized_movie(movie)
+        # Add average rating to each movie
+        localized_movie.average_rating = Rating.objects.filter(movie=movie).aggregate(Avg('rating'))['rating__avg']
+        localized_recommendations.append(localized_movie)
     
     return render(request, 'movies/recommendations.html', {
-        'recommendations': recommended_movies
+        'recommendations': localized_recommendations
     })
 
 def search_movies(request):

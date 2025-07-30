@@ -1,5 +1,6 @@
 
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -221,6 +222,96 @@
             color: rgba(255, 255, 255, 0.7);
             font-weight: 500;
         }
+        
+        /* Language Switcher Styling */
+        .language-switcher {
+            position: relative;
+        }
+        
+        .language-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .language-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(20, 20, 20, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            min-width: 120px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+        
+        .language-switcher:hover .language-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .language-option {
+            display: block;
+            padding: 10px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .language-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .language-option.active {
+            background: rgba(103, 126, 234, 0.2);
+            color: #ffffff;
+        }
+        
+        .language-option:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .language-option:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .globe-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -235,11 +326,11 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'movies:index' %}">All Movies</a>
+                        <a class="nav-link" href="{% url 'movies:index' %}">{% trans "All Movies" %}</a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'movies:recommendations' %}">Recommendations</a>
+                        <a class="nav-link" href="{% url 'movies:recommendations' %}">{% trans "Recommendations" %}</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -248,7 +339,7 @@
                 <div class="search-container me-3">
                     <form method="GET" action="{% url 'movies:search' %}" class="search-form-modern">
                         <div class="search-input-wrapper">
-                            <input type="search" name="q" placeholder="Search movies, genres, directors..." value="{{ request.GET.q }}" class="search-input">
+                            <input type="search" name="q" placeholder="{% trans 'Search movies, genres, directors...' %}" value="{{ request.GET.q }}" class="search-input">
                             <button type="submit" class="search-btn" aria-label="Search">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="11" cy="11" r="8"></circle>
@@ -258,6 +349,32 @@
                         </div>
                     </form>
                 </div>
+                <!-- Language Switcher -->
+                <div class="language-switcher me-3">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    <div class="language-btn">
+                        <svg class="globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                        <span>{% if LANGUAGE_CODE == 'fr' %}Fr{% else %}En{% endif %}</span>
+                    </div>
+                    <div class="language-dropdown">
+                        {% get_available_languages as LANGUAGES %}
+                        {% for lang_code, lang_name in LANGUAGES %}
+                        <form method="post" action="{% url 'set_language' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.get_full_path|slice:'3:' }}" />
+                            <input name="language" type="hidden" value="{{ lang_code }}" />
+                            <button type="submit" class="language-option {% if LANGUAGE_CODE == lang_code %}active{% endif %}">
+                                {{ lang_name }}
+                            </button>
+                        </form>
+                        {% endfor %}
+                    </div>
+                </div>
+                
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                     <li class="nav-item d-flex align-items-center">
@@ -266,14 +383,14 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        <a class="nav-link" href="{% url 'logout' %}">{% trans "Logout" %}</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                        <a class="nav-link" href="{% url 'signup' %}">{% trans "Sign Up" %}</a>
                     </li>
                     {% endif %}
                 </ul>

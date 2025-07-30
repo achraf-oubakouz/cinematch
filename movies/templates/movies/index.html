@@ -1,4 +1,5 @@
 {% extends 'movies/base.html' %}
+{% load i18n %}
 
 {% block title %}All Movies - CineMatch{% endblock %}
 
@@ -37,10 +38,10 @@
         text-align: left;
     }
     
-    .filter-toggle i {
-        font-size: 20px;
-        color: #667eea;
+    .filter-icon {
+        color: #ffffff;
         transition: all 0.3s ease;
+        flex-shrink: 0;
     }
     
     .filter-toggle:hover {
@@ -48,7 +49,7 @@
         transform: translateX(4px);
     }
     
-    .filter-toggle:hover i {
+    .filter-toggle:hover .filter-icon {
         color: #764ba2;
         transform: scale(1.1);
     }
@@ -276,8 +277,8 @@
 
 <div class="row">
     <div class="col-md-12">
-        <h1>All Movies</h1>
-        <p class="lead">Discover and rate your favorite movies</p>
+        <h1>{% trans "All Movies" %}</h1>
+        <p class="lead">{% trans "Discover and rate your favorite movies" %}</p>
     </div>
 </div>
 
@@ -285,8 +286,10 @@
 <div class="filters-container">
     <div class="filter-header">
         <button class="filter-toggle" onclick="toggleFilters()">
-            <i class="bi bi-funnel"></i>
-            <span>Filters & Sort</span>
+            <svg class="filter-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+            </svg>
+            <span>{% trans "Filters & Sort" %}</span>
         </button>
     </div>
     
@@ -295,9 +298,9 @@
             <div class="row">
                 <div class="col-md-2">
                     <div class="filter-section">
-                        <label class="filter-label">Genre</label>
+                        <label class="filter-label">{% trans "Genre" %}</label>
                         <select name="genre" class="form-select">
-                            <option value="">All Genres</option>
+                            <option value="">{% trans "All Genres" %}</option>
                             {% for genre in all_genres %}
                                 <option value="{{ genre }}" {% if current_filters.genre == genre %}selected{% endif %}>
                                     {{ genre }}
@@ -309,9 +312,9 @@
                 
                 <div class="col-md-2">
                     <div class="filter-section">
-                        <label class="filter-label">Year</label>
+                        <label class="filter-label">{% trans "Year" %}</label>
                         <select name="year" class="form-select">
-                            <option value="">Any Year</option>
+                            <option value="">{% trans "Any Year" %}</option>
                             {% for year in all_years %}
                                 <option value="{{ year }}" {% if current_filters.year == year|stringformat:"s" %}selected{% endif %}>
                                     {{ year }}
@@ -323,9 +326,9 @@
                 
                 <div class="col-md-3">
                     <div class="filter-section">
-                        <label class="filter-label">Director</label>
+                        <label class="filter-label">{% trans "Director" %}</label>
                         <select name="director" class="form-select">
-                            <option value="">Any Director</option>
+                            <option value="">{% trans "Any Director" %}</option>
                             {% for director in all_directors %}
                                 <option value="{{ director }}" {% if current_filters.director == director %}selected{% endif %}>
                                     {{ director }}
@@ -337,26 +340,26 @@
                 
                 <div class="col-md-2">
                     <div class="filter-section">
-                        <label class="filter-label">Min Rating</label>
+                        <label class="filter-label">{% trans "Min Rating" %}</label>
                         <select name="rating" class="form-select">
-                            <option value="">Any Rating</option>
-                            <option value="4" {% if current_filters.rating == "4" %}selected{% endif %}>4+ Stars</option>
-                            <option value="3" {% if current_filters.rating == "3" %}selected{% endif %}>3+ Stars</option>
-                            <option value="2" {% if current_filters.rating == "2" %}selected{% endif %}>2+ Stars</option>
-                            <option value="1" {% if current_filters.rating == "1" %}selected{% endif %}>1+ Stars</option>
+                            <option value="">{% trans "Any Rating" %}</option>
+                            <option value="4" {% if current_filters.rating == "4" %}selected{% endif %}>{% trans "4+ Stars" %}</option>
+                            <option value="3" {% if current_filters.rating == "3" %}selected{% endif %}>{% trans "3+ Stars" %}</option>
+                            <option value="2" {% if current_filters.rating == "2" %}selected{% endif %}>{% trans "2+ Stars" %}</option>
+                            <option value="1" {% if current_filters.rating == "1" %}selected{% endif %}>{% trans "1+ Stars" %}</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="col-md-3">
                     <div class="filter-section">
-                        <label class="filter-label">Sort By</label>
+                        <label class="filter-label">{% trans "Sort By" %}</label>
                         <select name="sort" class="form-select">
-                            <option value="title" {% if current_filters.sort == "title" %}selected{% endif %}>Title A-Z</option>
-                            <option value="year_desc" {% if current_filters.sort == "year_desc" %}selected{% endif %}>Release Year (Newest)</option>
-                            <option value="year_asc" {% if current_filters.sort == "year_asc" %}selected{% endif %}>Release Year (Oldest)</option>
-                            <option value="rating_desc" {% if current_filters.sort == "rating_desc" %}selected{% endif %}>Highest Rated</option>
-                            <option value="rating_asc" {% if current_filters.sort == "rating_asc" %}selected{% endif %}>Lowest Rated</option>
+                            <option value="title" {% if current_filters.sort == "title" %}selected{% endif %}>{% trans "Title A-Z" %}</option>
+                            <option value="year_desc" {% if current_filters.sort == "year_desc" %}selected{% endif %}>{% trans "Release Year (Newest)" %}</option>
+                            <option value="year_asc" {% if current_filters.sort == "year_asc" %}selected{% endif %}>{% trans "Release Year (Oldest)" %}</option>
+                            <option value="rating_desc" {% if current_filters.sort == "rating_desc" %}selected{% endif %}>{% trans "Highest Rated" %}</option>
+                            <option value="rating_asc" {% if current_filters.sort == "rating_asc" %}selected{% endif %}>{% trans "Lowest Rated" %}</option>
                         </select>
                     </div>
                 </div>
@@ -364,10 +367,10 @@
             
             <div class="filter-buttons">
                 <button type="submit" class="btn btn-filter">
-                    <i class="bi bi-search"></i> Apply Filters
+                    <i class="bi bi-search"></i> {% trans "Apply Filters" %}
                 </button>
                 <a href="{% url 'movies:index' %}" class="btn-clear">
-                    <i class="bi bi-x-circle"></i> Clear All
+                    <i class="bi bi-x-circle"></i> {% trans "Clear All" %}
                 </a>
             </div>
         </form>
@@ -375,12 +378,12 @@
         <!-- Active Filters Display -->
         {% if current_filters.genre or current_filters.year or current_filters.director or current_filters.rating %}
         <div class="active-filters">
-            <span class="active-filters-label">Active Filters</span>
+            <span class="active-filters-label">{% trans "Active Filters" %}</span>
             <div class="filter-tags">
                 {% if current_filters.genre %}<span class="filter-tag">{{ current_filters.genre }}</span>{% endif %}
                 {% if current_filters.year %}<span class="filter-tag">{{ current_filters.year }}</span>{% endif %}
                 {% if current_filters.director %}<span class="filter-tag">{{ current_filters.director }}</span>{% endif %}
-                {% if current_filters.rating %}<span class="filter-tag">{{ current_filters.rating }}+ Stars</span>{% endif %}
+                {% if current_filters.rating %}<span class="filter-tag">{{ current_filters.rating }}+ {% trans "Stars" %}</span>{% endif %}
             </div>
         </div>
         {% endif %}
@@ -398,7 +401,7 @@
                         <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
                     {% else %}
                         <div class="bg-secondary d-flex align-items-center justify-content-center h-100">
-                            <span class="text-white">No Image</span>
+                            <span class="text-white">{% trans "No Image" %}</span>
                         </div>
                     {% endif %}
                 </a>
@@ -429,9 +432,9 @@
                 </div>
                 
                 <div class="movie-actions">
-                    <a href="{% url 'movies:movie_detail' movie.id %}" class="btn-modern btn-primary-modern">View Details</a>
+                    <a href="{% url 'movies:movie_detail' movie.id %}" class="btn-modern btn-primary-modern">{% trans "View Details" %}</a>
                     {% if user.is_authenticated %}
-                        <a href="{% url 'movies:rate_movie' movie.id %}" class="btn-modern">Rate</a>
+                        <a href="{% url 'movies:rate_movie' movie.id %}" class="btn-modern">{% trans "Rate" %}</a>
                     {% endif %}
                 </div>
             </div>
@@ -439,8 +442,8 @@
     {% empty %}
     <div class="col-12">
         <div class="alert alert-info">
-            <h4>No movies available</h4>
-            <p>There are no movies in the database yet. Check back later!</p>
+            <h4>{% trans "No movies available" %}</h4>
+            <p>{% trans "There are no movies in the database yet. Check back later!" %}</p>
         </div>
     </div>
     {% endfor %}
@@ -453,7 +456,7 @@
             <ul class="pagination justify-content-center">
                 {% if movies.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% if current_filters.genre %}genre={{ current_filters.genre }}&{% endif %}{% if current_filters.year %}year={{ current_filters.year }}&{% endif %}{% if current_filters.director %}director={{ current_filters.director }}&{% endif %}{% if current_filters.rating %}rating={{ current_filters.rating }}&{% endif %}{% if current_filters.sort != 'title' %}sort={{ current_filters.sort }}&{% endif %}page={{ movies.previous_page_number }}">Previous</a>
+                    <a class="page-link" href="?{% if current_filters.genre %}genre={{ current_filters.genre }}&{% endif %}{% if current_filters.year %}year={{ current_filters.year }}&{% endif %}{% if current_filters.director %}director={{ current_filters.director }}&{% endif %}{% if current_filters.rating %}rating={{ current_filters.rating }}&{% endif %}{% if current_filters.sort != 'title' %}sort={{ current_filters.sort }}&{% endif %}page={{ movies.previous_page_number }}">{% trans "Previous" %}</a>
                 </li>
                 {% endif %}
                 
@@ -471,7 +474,7 @@
                 
                 {% if movies.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% if current_filters.genre %}genre={{ current_filters.genre }}&{% endif %}{% if current_filters.year %}year={{ current_filters.year }}&{% endif %}{% if current_filters.director %}director={{ current_filters.director }}&{% endif %}{% if current_filters.rating %}rating={{ current_filters.rating }}&{% endif %}{% if current_filters.sort != 'title' %}sort={{ current_filters.sort }}&{% endif %}page={{ movies.next_page_number }}">Next</a>
+                    <a class="page-link" href="?{% if current_filters.genre %}genre={{ current_filters.genre }}&{% endif %}{% if current_filters.year %}year={{ current_filters.year }}&{% endif %}{% if current_filters.director %}director={{ current_filters.director }}&{% endif %}{% if current_filters.rating %}rating={{ current_filters.rating }}&{% endif %}{% if current_filters.sort != 'title' %}sort={{ current_filters.sort }}&{% endif %}page={{ movies.next_page_number }}">{% trans "Next" %}</a>
                 </li>
                 {% endif %}
             </ul>
@@ -484,17 +487,19 @@
 function toggleFilters() {
     const filtersContent = document.getElementById('filtersContent');
     const button = document.querySelector('.filter-toggle');
-    const icon = button.querySelector('i');
+    const icon = button.querySelector('.filter-icon');
     const span = button.querySelector('span');
     
     if (filtersContent.classList.contains('show')) {
         filtersContent.classList.remove('show');
-        icon.className = 'bi bi-funnel';
-        span.textContent = 'Filters & Sort';
+        // Reset to regular filter icon
+        icon.innerHTML = '<polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>';
+        span.textContent = '{% trans "Filters & Sort" %}';
     } else {
         filtersContent.classList.add('show');
-        icon.className = 'bi bi-funnel-fill';
-        span.textContent = 'Hide Filters';
+        // Change to filled filter icon
+        icon.innerHTML = '<polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" fill="currentColor"></polygon>';
+        span.textContent = '{% trans "Hide Filters" %}';
     }
 }
 

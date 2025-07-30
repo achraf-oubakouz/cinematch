@@ -19,12 +19,13 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from movies.forms import CustomUserCreationForm
+from movies.forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.views.generic import CreateView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import messages
 from django.urls import reverse_lazy
+from django.conf.urls.i18n import i18n_patterns
 
 def logout_view(request):
     logout(request)
@@ -41,13 +42,19 @@ class CustomSignUpView(CreateView):
         messages.success(self.request, f'Account created successfully for {username}! Please login to continue.')
         return response
 
+# Language-independent URLs (like admin and language switching)
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('i18n/', include('django.conf.urls.i18n')),
+]
+
+# Language-dependent URLs
+urlpatterns += i18n_patterns(
     path('', include('movies.urls', namespace='movies')),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('login/', auth_views.LoginView.as_view(authentication_form=CustomAuthenticationForm), name='login'),
     path('logout/', logout_view, name='logout'),
     path('signup/', CustomSignUpView.as_view(), name='signup'),
-]
+)
 
 # Serve media files in development
 if settings.DEBUG:
